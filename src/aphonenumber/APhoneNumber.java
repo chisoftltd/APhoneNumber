@@ -5,9 +5,9 @@
  */
 package aphonenumber;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 /**
  *
@@ -18,34 +18,88 @@ public class APhoneNumber {
     /**
      * @param args the command line arguments
      */
+    public static final String YES = "YES";
+    public static final String NO = "NO";
+    private static Tree tree = new Tree();
+    private static boolean isConsistent = true;
+
+    private static class Tree {
+
+        int node = 0;
+        boolean isCons = false;
+        Tree[] next = new Tree[10];
+
+        public void setNext(int index, Tree t) {
+            next[index] = t;
+        }
+
+        public Tree getTree(int index) {
+            return next[index];
+        }
+    }
+
     public static void main(String[] args) {
         // TODO code application logic here
+        PhoneList phoneList = new PhoneList();
+        try {
+            phoneList.build();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-        List<String> phoneList = new ArrayList<>();
-        String input;
-        Scanner text = new Scanner(System.in);
-        int ii = 0;
-        System.out.println("Test 1");
-        while (text.hasNext()) {
-            input = text.nextLine();
-            phoneList.add(input);
-            System.out.println("Test 2" + phoneList.get(ii++));
-            for (int i = 0; i < phoneList.size(); i++) {
-                for (int j = 0; j < phoneList.size(); j++) {
-                    if (phoneList.get(j).length() > 3) {
-System.out.println("Test 3");
-                        if ((phoneList.get(i).substring(0, 3).equals(phoneList.get(j).substring(0, 3))) && (i != j)) {
-                            System.out.println("NO");
-                            return;
-                        } else {
-                        }
+    private static class PhoneList {
 
+        public PhoneList() {
+        }
+
+        private void build() throws IOException {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            int t = Integer.parseInt(reader.readLine());
+            for (int i = 0; i < t; ++i) {
+                int n = Integer.parseInt(reader.readLine());
+                tree = new Tree();
+                isConsistent = true;
+                for (int j = 0; j < n; ++j) {
+                    String phone = reader.readLine();
+                    if (isConsistent) {
+                        buildTree(phone);
                     }
                 }
+                if (isConsistent) {
+                    System.out.println(YES);
+                } else {
+                    System.out.println(NO);
+                }
             }
-            
-            System.out.println("YES");
+        }
 
+        private void buildTree(String s) {
+            int len = s.length();
+            Tree auxTree = tree;
+            for (int i = 0; i < len; ++i) {
+                int ch = Integer.parseInt(s.substring(i, i + 1));
+                Tree aux = auxTree.next[ch];
+                if (aux == null) {
+                    aux = new Tree();
+                    aux.node = 1;
+                    if (i == len - 1) {
+                        aux.isCons = true;
+                    }
+                    auxTree.setNext(ch, aux);
+                    auxTree = aux;
+                } else {
+                    if (aux.isCons) {
+                        isConsistent = false;
+                        break;
+                    }
+                    if (i == len - 1) {
+                        isConsistent = false;
+                        break;
+                    }
+                    auxTree = aux;
+                }
+            }
         }
 
     }
